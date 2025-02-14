@@ -64,13 +64,13 @@ def analyze():
         memory1 = data['memory1']
         memory2 = data['memory2']
         participant_code = data['participant_code']
-        email = data['email']
+        # email = data['email']
         
         # Compute hybrid similarity
         similarity_percentage = hybrid_similarity(memory1, memory2)
         
         # Save only necessary data to Google Sheets
-        spreadsheet.append_row([participant_code, email, similarity_percentage])
+        spreadsheet.append_row([participant_code, similarity_percentage])
         
         return jsonify({'similarity': similarity_percentage})
     except Exception as e:

@@ -23,22 +23,52 @@
             border-radius: 5px;
             display: none;
         }
+        .instructions {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border-left: 4px solid #0d6efd;
+        }
+        .instructions p {
+            margin-bottom: 0.5rem;
+        }
+        .instructions ul {
+            padding-left: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2 class="mb-4 text-center">Memory Recall Similarity Analysis</h2>
         
+        <div class="instructions">
+            <p><strong>Note:</strong></p>
+            <p>The recalls you are pasting here will not be stored. Only a similarity score will be generated in order to assess how similar your Day 1 and Day 7 recall are.</p>
+            
+            <p><strong>Directions for Participant Code:</strong></p>
+            <p>We'd like you to create an individualized code. This code will assist researchers who wish to link responses on this survey to responses on other surveys that you complete while keeping your identity safe. Please read the following questions carefully.</p>
+            <ol>
+                <li>Second letter of your first name (e.g., Mary = A)</li>
+                <li>First letter of the city/town of your birth (e.g., Akron, OH = A)</li>
+                <li>Birth day as two digits (e.g., 12th day of the month = 12)</li>
+                <li>Last letter of your last name (e.g., Thompson = N)</li>
+                <li>Birth month as two digits (e.g., September = 09)</li>
+                <li>First letter of your mother's first name (e.g., Mary = M) (If your mother's name is unavailable, please use X")</li>
+            </ol>
+            <p><strong>EXAMPLE: MA12N09M</strong></p>
+        </div>
+
         <form id="analysisForm">
             <div class="mb-3">
                 <label for="participantCode" class="form-label">Participant Code:</label>
                 <input type="text" class="form-control" id="participantCode" required>
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <label for="email" class="form-label">Email:</label>
                 <input type="email" class="form-control" id="email" required>
-            </div>
+            </div> -->
 
             <div class="mb-3">
                 <label for="memory1" class="form-label">Memory Recall 1:</label>
@@ -80,7 +110,7 @@
                     },
                     body: JSON.stringify({
                         participant_code: document.getElementById('participantCode').value,
-                        email: document.getElementById('email').value,
+                        // email: document.getElementById('email').value,
                         memory1: document.getElementById('memory1').value,
                         memory2: document.getElementById('memory2').value
                     })
