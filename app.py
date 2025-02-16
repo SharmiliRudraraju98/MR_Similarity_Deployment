@@ -12,7 +12,7 @@ nltk.download('wordnet')
 app = Flask(__name__)
 
 # Load a better model for sentence-level similarity
-model = SentenceTransformer('sentence-t5-large')
+model = SentenceTransformer('sentence-t5-base')
 
 # Initialize lemmatizer
 lemmatizer = WordNetLemmatizer()
