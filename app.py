@@ -1,15 +1,21 @@
 from flask import Flask, render_template, request, jsonify
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer, util
 from Levenshtein import ratio
 # import gspread
 # from oauth2client.service_account import ServiceAccountCredentials
 import os
+import nltk
+from nltk.stem import WordNetLemmatizer
+
+nltk.download('wordnet')
 
 app = Flask(__name__)
 
-# Initialize TF-IDF Vectorizer
-vectorizer = TfidfVectorizer(stop_words='english')
+# Load a better model for sentence-level similarity
+model = SentenceTransformer('sentence-t5-base')
+
+# Initialize lemmatizer
+lemmatizer = WordNetLemmatizer()
 
 # Google Sheets setup
 # scope = [
@@ -25,24 +31,25 @@ vectorizer = TfidfVectorizer(stop_words='english')
 #     print(f"Error setting up Google Sheets: {e}")
 
 def preprocess_text(text):
-    """Basic preprocessing"""
-    return text.lower().strip()
+    """Preprocess text by lowercasing and lemmatizing words."""
+    words = text.lower().strip().split()
+    return " ".join([lemmatizer.lemmatize(word) for word in words])
 
 def hybrid_similarity(text1, text2):
-    """Compute similarity using TF-IDF and Levenshtein"""
-    # Preprocess texts
-    text1_clean = preprocess_text(text1)
-    text2_clean = preprocess_text(text2)
+    """Compute a combined similarity score using SBERT + Levenshtein ratio."""
+    # Preprocess input texts
+    text1, text2 = preprocess_text(text1), preprocess_text(text2)
     
-    # TF-IDF similarity
-    tfidf_matrix = vectorizer.fit_transform([text1_clean, text2_clean])
-    semantic_score = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+    # Compute SBERT similarity
+    embedding1 = model.encode(text1, normalize_embeddings=True)
+    embedding2 = model.encode(text2, normalize_embeddings=True)
+    semantic_score = util.cos_sim(embedding1, embedding2).item()
     
-    # Levenshtein similarity
-    edit_distance_score = ratio(text1_clean, text2_clean)
+    # Compute character-based similarity (Levenshtein distance)
+    edit_distance_score = ratio(text1, text2)  # 0 to 1 scale
     
-    # Weighted combination
-    final_score = (semantic_score * 0.7) + (edit_distance_score * 0.3)
+    # Weighted combination (adjust weights as needed)
+    final_score = (semantic_score * 0.77) + (edit_distance_score * 0.23)
     
     return round(final_score * 100, 2)
 
@@ -57,9 +64,12 @@ def analyze():
         memory1 = data['memory1']
         memory2 = data['memory2']
         participant_code = data['participant_code']
+        # email = data['email']
         
+        # Compute hybrid similarity
         similarity_percentage = hybrid_similarity(memory1, memory2)
         
+        # Save only necessary data to Google Sheets
         # spreadsheet.append_row([participant_code, similarity_percentage])
         
         return jsonify({'similarity': similarity_percentage})
